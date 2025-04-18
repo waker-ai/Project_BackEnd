@@ -21,14 +21,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-<<<<<<< HEAD
                 .anyRequest().permitAll()
-=======
-                .antMatchers("/api/accounts/**").permitAll() // 允许 /api/accounts 访问
-                .antMatchers("/api/products/**").permitAll()
-                .antMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // 允许 CORS 预检请求
-                .anyRequest().authenticated()
->>>>>>> ee2e90e4d4c9dd73a325a8c6ce07a630a84261af
                 .and()
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

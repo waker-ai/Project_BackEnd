@@ -2,28 +2,18 @@ package com.example.tomatomall.service.serviceImpl;
 
 import com.example.tomatomall.po.Product;
 import com.example.tomatomall.po.Stockpile;
-import com.example.tomatomall.repository.CartRepository;
 import com.example.tomatomall.repository.SpecificationRepository;
 import com.example.tomatomall.po.Specification;
 import com.example.tomatomall.repository.ProductRepository;
-<<<<<<< HEAD
 import com.example.tomatomall.repository.StockpileRepository;
-=======
-import com.example.tomatomall.service.OssService;
->>>>>>> ee2e90e4d4c9dd73a325a8c6ce07a630a84261af
 import com.example.tomatomall.service.ProductService;
 import com.example.tomatomall.vo.ProductVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-<<<<<<< HEAD
 import javax.transaction.Transactional;
-=======
-import java.io.IOException;
->>>>>>> ee2e90e4d4c9dd73a325a8c6ce07a630a84261af
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,16 +23,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     ProductRepository productRepository;
-    @Autowired
-    private OssService ossService;
 
     @Autowired
     private SpecificationRepository specificationRepository;
 
     @Autowired
     private StockpileRepository stockpileRepository;
-    @Autowired
-    private CartRepository cartRepository;
 
     @Override
     public List<ProductVO> getAllProducts() {
@@ -91,7 +77,6 @@ public class ProductServiceImpl implements ProductService {
             existproduct.setDescription(productVO.getDescription());
             existproduct.setCover(productVO.getCover());
             existproduct.setDetail(productVO.getDetail());
-<<<<<<< HEAD
             if (productVO.getSpecifications() != null) {
                 // 先删除原有的规格，防止重复数据
                 specificationRepository.deleteByProductId(existproduct.getId());
@@ -109,18 +94,6 @@ public class ProductServiceImpl implements ProductService {
 
                 // 保存更新后的规格
                 specificationRepository.saveAll(specifications);
-=======
-            existproduct.setSpecifications(productVO.getSpecifications());
-
-            if (productVO.getCover() != null && !productVO.getCover().isEmpty()) {
-                try {
-                    String coverUrl = uploadCover(productVO.getCover());
-                    existproduct.setCover(coverUrl);
-                } catch (IOException e) {
-                    // 处理上传失败的情况，可以设置一个默认头像或者记录日志
-                    existproduct.setCover(null);
-                }
->>>>>>> ee2e90e4d4c9dd73a325a8c6ce07a630a84261af
             }
             // 保存更新后的产品信息
             Product updatedProduct = productRepository.save(existproduct);
@@ -138,13 +111,13 @@ public class ProductServiceImpl implements ProductService {
         product.setPrice(Optional.ofNullable(productVO.getPrice()).orElse(BigDecimal.ZERO));  // 默认价格为 0
         product.setRate(Optional.ofNullable(productVO.getRate()).orElse(0.0)); // 默认评分 0.0
         product.setDescription(Optional.ofNullable(productVO.getDescription()).orElse("暂无描述"));
+        product.setCover(Optional.ofNullable(productVO.getCover()).orElse("1")); // 默认封面为空字符串
         product.setDetail(Optional.ofNullable(productVO.getDetail()).orElse("暂无详情"));
 
         Stockpile stockpile=new Stockpile();
         stockpile.setAmount(productVO.getStockAmount());
         stockpile.setFrozen(0);
 
-<<<<<<< HEAD
         Product savedProduct = productRepository.save(product);
 
         stockpile.setProduct(savedProduct);
@@ -178,26 +151,6 @@ public class ProductServiceImpl implements ProductService {
         }
         stockpile.setAmount(amount);
         stockpileRepository.save(stockpile);
-=======
-        if (productVO.getCover() != null && !productVO.getCover().isEmpty()) {
-            try {
-                String coverUrl = uploadCover(productVO.getCover());
-                product.setCover(coverUrl);
-            } catch (IOException e) {
-                // 处理上传失败的情况，可以设置一个默认头像或者记录日志
-                product.setCover(null);
-            }
-        }
-        productRepository.save(product);
-        return product.toVO();
->>>>>>> ee2e90e4d4c9dd73a325a8c6ce07a630a84261af
-    }
-
-    private String uploadCover(String base64Image) throws IOException {
-        // 解码Base64字符串
-        byte[] imageBytes = Base64.getDecoder().decode(base64Image.split(",")[1]);
-        // 使用OssService上传图片
-        return ossService.uploadFile(imageBytes, "cover_" + System.currentTimeMillis() + ".png");
     }
 
     @Override
@@ -205,7 +158,6 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(id).orElse(null);
         if (product != null) {
             productRepository.deleteById(id);
-            cartRepository.deleteByProductId(id);
             return true;
         }
         return false;
