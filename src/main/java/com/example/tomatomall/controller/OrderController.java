@@ -6,6 +6,9 @@ import com.example.tomatomall.repository.OrderRepository;
 import com.example.tomatomall.service.AliPayable;
 import com.example.tomatomall.service.OrderService;
 import com.example.tomatomall.config.AliPayConfig;
+import com.example.tomatomall.service.serviceImpl.CartServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +25,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
+    private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
+
 
     @Autowired
     private OrderService orderService;
@@ -60,11 +65,13 @@ public class OrderController {
                     "RSA2"
             );
         } catch (Exception e) {
+            logger.error("签名验证失败", e);  // 记录详细的异常信息
             httpServletResponse.getWriter().print("fail");
             return;
         }
 
         if (!signVerified) {
+            logger.error("支付宝签名验证失败, 请求参数: {}", params);
             httpServletResponse.getWriter().print("fail");
             return;
         }
@@ -91,6 +98,10 @@ public class OrderController {
             } else {
                 httpServletResponse.getWriter().print("fail");
             }
+        } else {
+            logger.warn("支付宝支付状态不为成功: {}", httpServletRequest.getParameter("trade_status")); // 添加日志记录
+            httpServletResponse.getWriter().print("fail");
+            return;
         }
         httpServletResponse.getWriter().print("fail");
     }
@@ -111,6 +122,7 @@ public class OrderController {
 
             html = fileContent.toString();
         } catch (IOException e) {
+            logger.error("读取返回页面文件失败, 文件路径: {}", filePath, e);  // 记录详细错误
             e.printStackTrace();
         }
 

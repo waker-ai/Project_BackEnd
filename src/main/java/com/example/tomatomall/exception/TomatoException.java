@@ -18,4 +18,6 @@ public class TomatoException extends RuntimeException{
     public static TomatoException productNotFound() { return new TomatoException("未发现该商品"); }
 
     public static TomatoException notLogin() { return new TomatoException("未登录"); }
+
+    public static TomatoException stockpileNotFound() { return new TomatoException("为发现相关库存"); }
 }

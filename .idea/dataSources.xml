@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="tomoto" uuid="f5e7eea0-68f3-40a2-bf21-2d41e270ccf7">
+    <data-source source="LOCAL" name="tomato@localhost" uuid="4fc73a62-a97f-4c10-a42c-ef70cae175f4">
       <driver-ref>mysql.8</driver-ref>
       <synchronize>true</synchronize>
+      <remarks>tomato</remarks>
       <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
       <jdbc-url>jdbc:mysql://localhost:3306/tomato</jdbc-url>
       <jdbc-additional-properties>

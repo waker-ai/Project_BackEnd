@@ -18,6 +18,7 @@ import java.util.Map;
 
 @Service
 public class OrderServiceImpl implements OrderService {
+
     @Autowired
     private OrderRepository orderRepository;
 
@@ -44,11 +45,12 @@ public class OrderServiceImpl implements OrderService {
         try {
             Map<String, String> returnParams = new HashMap<>();
             Map<String, String> notifyParams = new HashMap<>();
-            returnParams.put("url", URLEncoder.encode("http://localhost:3000/api/cart", "UTF-8"));
+            returnParams.put("url", URLEncoder.encode("http://localhost:3000/#/cart", "UTF-8"));
             notifyParams.put("service", "orderService");
 
             form = aliPayConfig.pay(bizContent, notifyParams, returnParams);
         } catch (Exception e) {
+            logger.error("调用支付宝支付异常", e); // 打印具体异常
             throw TomatoException.payError();
         }
 
@@ -58,6 +60,7 @@ public class OrderServiceImpl implements OrderService {
             httpServletResponse.getWriter().flush();
             httpServletResponse.getWriter().close();
         } catch (IOException e) {
+
             throw TomatoException.payError();
         }
     }

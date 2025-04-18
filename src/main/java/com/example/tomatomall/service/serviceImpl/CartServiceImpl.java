@@ -1,5 +1,6 @@
 package com.example.tomatomall.service.serviceImpl;
 
+import com.example.tomatomall.config.LoginInterceptor;
 import com.example.tomatomall.dto.CheckoutRequest;
 import com.example.tomatomall.enums.OrderStatusEnum;
 import com.example.tomatomall.exception.TomatoException;
@@ -10,16 +11,31 @@ import com.example.tomatomall.repository.ProductRepository;
 import com.example.tomatomall.repository.StockpileRepository;
 import com.example.tomatomall.service.CartService;
 import com.example.tomatomall.util.SecurityUtil;
+import com.example.tomatomall.util.TokenUtil;
 import com.example.tomatomall.vo.CartItemVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.net.ssl.HandshakeCompletedEvent;
+import javax.servlet.http.HttpSession;
+import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.hibernate.internal.CoreLogging.logger;
+
 @Service
 public class CartServiceImpl implements CartService {
+
+    private static final Logger logger = LoggerFactory.getLogger(CartServiceImpl.class);
+
+    @Autowired
+    private TokenUtil tokenUtil;
 
     @Autowired
     private SecurityUtil securityUtil;
@@ -43,18 +59,19 @@ public class CartServiceImpl implements CartService {
         if (!productRepository.existsById(productId)) {
             throw TomatoException.productNotFound();
         }
-        // 检查库存是否足够
-        if (stockpileRepository.findById(productId).get().getAmount() < quantity) {
-            throw TomatoException.insufficientStock();
-        }
         //获取当前用户ID
         User user = securityUtil.getCurrentUser();
         Long userId = user.getId();
+
         //检查购物车中是否已经存在该商品
         CartItem cartItem = cartRepository.findByUserIdAndProductId(userId, productId).
                 orElse(new CartItem(userId, productId, 0));
         //更新购物车中的商品数量
         int newQuantity = quantity + cartItem.getQuantity();
+        // 检查库存是否足够
+        if (stockpileRepository.findById(productId).get().getAmount() < newQuantity) {
+            throw TomatoException.insufficientStock();
+        }
         cartItem.setQuantity(newQuantity);
         //保存购物车中的商品
         cartRepository.save(cartItem);
@@ -78,30 +95,41 @@ public class CartServiceImpl implements CartService {
     public void deleteCartItem(Long cartItemId) {
         User user = securityUtil.getCurrentUser();
         Long userId = user.getId();
-        CartItem cartItem = cartRepository.findByUserIdAndProductId(userId, cartItemId)
+        CartItem cartItem = cartRepository.findByUserIdAndCartItemId(userId, cartItemId)
                 .orElseThrow(TomatoException::cartItemNotFound);
         cartRepository.delete(cartItem);
     }
 
     //修改购物车中的商品数量
-    @Override
-    public void updateCartItemQuantity(Long cartItemId, Integer quantity) {
-        User user = securityUtil.getCurrentUser();
-        Long userId = user.getId();
-        CartItem cartItem = cartRepository.findByUserIdAndProductId(userId, cartItemId)
-                .orElseThrow(TomatoException::cartItemNotFound);
+        @Transactional
+        @Override
+        public void updateCartItemQuantity(Long cartItemId, Integer quantity) {
+            System.out.println(quantity);
+            User user = securityUtil.getCurrentUser();
+            Long userId = user.getId();
+            CartItem cartItem = cartRepository.findByUserIdAndCartItemId(userId, cartItemId)
+                    .orElseThrow(TomatoException::cartItemNotFound);
 
-        //检查库存是否足够
-        if (stockpileRepository.findById(cartItem.getProductId()).get().getAmount() < quantity) {
-            throw TomatoException.insufficientStock();
+            if (quantity < 0) {
+                throw TomatoException.insufficientStock();
+            }
+            //检查库存是否足够
+            Stockpile stock = stockpileRepository.findById(cartItem.getProductId())
+                    .orElseThrow(() -> TomatoException.stockpileNotFound());
+            int stockAmount = stock.getAmount();
+            System.out.println("库存为：" + stockAmount + "，用户请求数量为：" + quantity);
+            if (stockAmount < quantity) {
+                System.out.println("库存不足，即将抛出异常");
+                throw TomatoException.insufficientStock();
+            }
+            cartItem.setQuantity(quantity);
+            cartRepository.save(cartItem);
         }
-        cartItem.setQuantity(quantity);
-        cartRepository.save(cartItem);
-    }
 
     @Override
     public Map<String, Object> getAllCartItems() {
         User user = securityUtil.getCurrentUser();
+//        logger.info("当前登录用户：" + securityUtil.getCurrentUser());
         List<CartItem> cartItems = cartRepository.findByUserId(user.getId());
 
         List<Map<String, Object>> itemList = new ArrayList<>();
@@ -129,6 +157,18 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Order checkout(CheckoutRequest request) {
+
+        User user = securityUtil.getCurrentUser();
+        if (user == null) {
+            logger.error("当前会话中找不到用户，请确认是否登录且已写入 session");
+        } else {
+            logger.info("当前用户为：" + user.getUsername());
+        }
+//        logger.info("当前登录用户：", user.getUsername());
+        System.out.println(request);
+        if (request.getCartItemIds() == null || request.getCartItemIds().isEmpty()) {
+            throw new IllegalArgumentException("cartItemIDs 不能为空");
+        }
         List<CartItem> selectedItems = cartRepository.findAllById(request.getCartItemIds());
 
         // 检查库存是否足够
@@ -149,7 +189,20 @@ public class CartServiceImpl implements CartService {
 
         //创建订单
         Order order = new Order();
-        order.setUserId(securityUtil.getCurrentUser().getId());
+
+        try {
+//            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//            if (authentication != null && authentication.isAuthenticated()) {
+//                System.out.println("Authenticated user: " + authentication.getName());
+//            } else {
+//                System.out.println("No authenticated user found.");
+//            }
+            Long userId = securityUtil.getCurrentUser().getId();
+            logger.info("userId:" + userId);
+            order.setUserId(userId);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to set user ID", e);
+        }
         order.setTotalAmount(totalAmount);
         order.setPaymentMethod(request.getPaymentMethod());
         order.setStatus(OrderStatusEnum.PENDING);
@@ -161,8 +214,11 @@ public class CartServiceImpl implements CartService {
         //锁定库存
         for(CartItem cartItem : selectedItems){
             Stockpile stockpile = stockpileRepository.findByProductId(cartItem.getProductId()).orElseThrow(TomatoException::productNotFound);
-            stockpile.setAmount(stockpile.getAmount() - cartItem.getQuantity());
-            stockpile.setFrozen(stockpile.getFrozen() + cartItem.getQuantity());
+            Integer currentAmount = Optional.ofNullable(stockpile.getAmount()).orElse(0);
+            Integer currentFrozen = Optional.ofNullable(stockpile.getFrozen()).orElse(0);
+
+            stockpile.setAmount(currentAmount - cartItem.getQuantity());
+            stockpile.setFrozen(currentFrozen + cartItem.getQuantity());
             stockpileRepository.save(stockpile);
         }
         return order;

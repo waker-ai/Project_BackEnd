@@ -11,6 +11,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = TomatoException.class)
     public Response<String> handleAIExternalException(TomatoException e) {
         logger.error(e.getMessage());
+        //解开注释可以打印后面的堆栈跟踪信息
         e.printStackTrace();
         return Response.buildFailure(e.getMessage(), "400");
     }

@@ -6,6 +6,8 @@ import com.aliyun.oss.common.utils.BinaryUtil;
 import com.aliyun.oss.model.MatchMode;
 import com.aliyun.oss.model.PolicyConditions;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,18 +16,17 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@ConfigurationProperties(prefix = "aliyun.oss")
+@Component
 @RestController
 public class OssController {
 
     @Value("${aliyun.oss.accessKeyId}")
     private String accessKeyId;
-
     @Value("${aliyun.oss.accessKeySecret}")
     private String accessKeySecret;
-
     @Value("${aliyun.oss.endpoint}")
     private String endpoint;
-
     @Value("${aliyun.oss.bucketName}")
     private String bucketName;
 

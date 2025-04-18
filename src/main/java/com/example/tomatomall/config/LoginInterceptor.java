@@ -35,13 +35,16 @@ public class LoginInterceptor implements HandlerInterceptor {
         }
 
         String token = request.getHeader("token");
-        logger.info("Received token: {}", token);
+
         if (token != null && tokenUtil.verifyToken(token)) {
             User user = tokenUtil.getUser(token);
-            logger.info("User retrieved from token: {}", user);
+
             if (user != null) {
                 request.getSession().setAttribute("currentUser", user);
+//                logger.info("用户信息存入session: " + user);
                 return true;
+            } else {
+                logger.warn("用户信息为空");
             }
         }
         logger.warn("Invalid or missing token");
