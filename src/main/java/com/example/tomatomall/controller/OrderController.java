@@ -7,6 +7,7 @@ import com.example.tomatomall.service.AliPayable;
 import com.example.tomatomall.service.OrderService;
 import com.example.tomatomall.config.AliPayConfig;
 import com.example.tomatomall.service.serviceImpl.CartServiceImpl;
+import com.example.tomatomall.vo.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +45,8 @@ public class OrderController {
     }
 
     @PostMapping("/{orderId}/pay")
-    public void pay(@PathVariable(value = "orderId") Long orderId, HttpServletResponse httpServletResponse) {
-        orderService.pay(orderId, httpServletResponse);
+    public Response<Map<String, Object>> pay(@PathVariable(value = "orderId") Long orderId, HttpServletResponse httpServletResponse) {
+        return Response.buildSuccess(orderService.pay(orderId, httpServletResponse));
     }
 
 
@@ -54,7 +55,7 @@ public class OrderController {
         // 1. 解析支付宝回调参数（通常是 application/x-www-form-urlencoded）
         Map<String, String> params = httpServletRequest.getParameterMap().entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue()[0]));
-
+        logger.info("支付宝回调参数：" + params);
         // 2. 验证支付宝签名（防止伪造请求）
         boolean signVerified;
         try {

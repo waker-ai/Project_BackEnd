@@ -29,12 +29,11 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public void pay(Long orderId, javax.servlet.http.HttpServletResponse httpServletResponse) {
+    public Map<String, Object> pay(Long orderId, javax.servlet.http.HttpServletResponse httpServletResponse) {
         Order order = orderRepository.findByOrderId(orderId).orElse(null);
         if (order == null) {
             throw TomatoException.orderNotFound();
         }
-
 
         JSONObject bizContent = new JSONObject();
         bizContent.put("out_trade_no", String.valueOf(orderId));
@@ -54,15 +53,22 @@ public class OrderServiceImpl implements OrderService {
             throw TomatoException.payError();
         }
 
-        httpServletResponse.setContentType("text/html;charset=UTF-8");
-        try {
-            httpServletResponse.getWriter().write(form);
-            httpServletResponse.getWriter().flush();
-            httpServletResponse.getWriter().close();
-        } catch (IOException e) {
+//        httpServletResponse.setContentType("text/html;charset=UTF-8");
+//        try {
+//            httpServletResponse.getWriter().write(form);
+//            httpServletResponse.getWriter().flush();
+//            httpServletResponse.getWriter().close();
+//        } catch (IOException e) {
+//            throw TomatoException.payError();
+//        }
 
-            throw TomatoException.payError();
-        }
+        Map<String, Object> result = new HashMap<>();
+        result.put("paymentForm", form);
+        result.put("orderId", orderId);
+        result.put("totalAmount", order.getTotalAmount());
+        result.put("paymentMethod", order.getPaymentMethod());
+        logger.info("pay method result:" + result.toString());
+        return result;
     }
 
     @Override
