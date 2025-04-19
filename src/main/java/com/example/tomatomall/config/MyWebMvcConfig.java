@@ -25,10 +25,13 @@ public class MyWebMvcConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**")
                 .excludePathPatterns("/api/accounts/")
                 .excludePathPatterns("/api/accounts/**")
-                .excludePathPatterns("api/products/**")
+                .excludePathPatterns("/api/products/**")
                 .excludePathPatterns("/api/accounts/login")
                 .excludePathPatterns("/api/oss/signature")
                 .excludePathPatterns("/api/ali/*")
+                .excludePathPatterns("/api/orders/**")
+                .excludePathPatterns("/favicon.ico")
+                .excludePathPatterns("/error")
                 .order(1);
     }
 

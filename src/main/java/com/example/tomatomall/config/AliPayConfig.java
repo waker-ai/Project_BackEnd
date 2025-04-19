@@ -50,46 +50,48 @@ public class AliPayConfig {
      *        在bizContent中放入关键的信息：tradeName、price、name
      *        返回的form是一个String类型的html页面
      */
-    public String pay(JSONObject bizContent, Map<String, String> notifyParams, Map<String, String> returnParams) {
-        logger.info("支付宝支付配置: " + serverUrl + " " + appId + " " + appPrivateKey + " " + alipayPublicKey + " " + notifyUrl + " " + returnUrl);
-        logger.info("支付请求 bizContent" + bizContent.toJSONString());
+    public String pay(JSONObject bizContent, Map<String, String> returnParams) {
+//        logger.info("支付宝支付配置: " + serverUrl + " " + appId + " " + appPrivateKey + " " + alipayPublicKey + " " + notifyUrl + " " + returnUrl);
+//        logger.info("支付请求 bizContent" + bizContent.toJSONString());
         AlipayClient alipayClient = new DefaultAlipayClient(serverUrl, appId, appPrivateKey, format, charset,
                 alipayPublicKey, signType);
         AlipayTradePagePayRequest request = new AlipayTradePagePayRequest();
-        boolean firstTime = true;
-        StringBuilder notifyUrlStringBuilder = new StringBuilder(notifyUrl + "?");
-        for (String key : notifyParams.keySet()) {
-            if (firstTime) {
-                firstTime = false;
-            } else {
-                notifyUrlStringBuilder.append("&");
-            }
-            notifyUrlStringBuilder.append(key);
-            notifyUrlStringBuilder.append("=");
-            notifyUrlStringBuilder.append(notifyParams.get(key));
-        }
-        String gotNotifyUrl = notifyUrlStringBuilder.toString();
-        System.out.println(gotNotifyUrl);
-        request.setNotifyUrl(gotNotifyUrl);
 
-        firstTime = true;
-        StringBuilder returnUrlStringBuilder = new StringBuilder(returnUrl + "?");
-        for (String key : returnParams.keySet()) {
-            if (firstTime) {
-                firstTime = false;
-            } else {
-                returnUrlStringBuilder.append("&");
-            }
-            returnUrlStringBuilder.append(key);
-            returnUrlStringBuilder.append("=");
-            returnUrlStringBuilder.append(returnParams.get(key));
-        }
-        request.setReturnUrl(returnUrlStringBuilder.toString());
-        System.out.println(returnUrlStringBuilder);
+//        StringBuilder notifyUrlStringBuilder = new StringBuilder(notifyUrl + "?");
+//        for (String key : notifyParams.keySet()) {
+//            if (firstTime) {
+//                firstTime = false;
+//            } else {
+//                notifyUrlStringBuilder.append("&");
+//            }
+//            notifyUrlStringBuilder.append(key);
+//            notifyUrlStringBuilder.append("=");
+//            notifyUrlStringBuilder.append(notifyParams.get(key));
+//        }
+//        String gotNotifyUrl = notifyUrlStringBuilder.toString();
+//        System.out.println(gotNotifyUrl);
+        request.setNotifyUrl(notifyUrl);
+        logger.info("notifyUrl: " + notifyUrl);
+
+//        boolean firstTime = true;
+//        StringBuilder returnUrlStringBuilder = new StringBuilder(returnUrl + "?");
+//        for (String key : returnParams.keySet()) {
+//            if (firstTime) {
+//                firstTime = false;
+//            } else {
+//                returnUrlStringBuilder.append("&");
+//            }
+//            returnUrlStringBuilder.append(key);
+//            returnUrlStringBuilder.append("=");
+//            returnUrlStringBuilder.append(returnParams.get(key));
+//        }
+//        request.setReturnUrl(returnUrlStringBuilder.toString());
+        request.setReturnUrl(returnUrl);
+        logger.info("returnUrl: " + returnUrl);
         bizContent.put("product_code", "FAST_INSTANT_TRADE_PAY");
         request.setBizContent(bizContent.toString());
         String form;
-        System.out.println("支付宝 bizContent: " + bizContent.toJSONString());
+        logger.info("支付宝 bizContent: " + bizContent.toJSONString());
         try {
             form = alipayClient.pageExecute(request).getBody();
         } catch (Exception e) {

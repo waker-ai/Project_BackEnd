@@ -43,11 +43,9 @@ public class OrderServiceImpl implements OrderService {
         String form = "";
         try {
             Map<String, String> returnParams = new HashMap<>();
-            Map<String, String> notifyParams = new HashMap<>();
             returnParams.put("url", URLEncoder.encode("http://localhost:3000/#/cart", "UTF-8"));
-            notifyParams.put("service", "orderService");
 
-            form = aliPayConfig.pay(bizContent, notifyParams, returnParams);
+            form = aliPayConfig.pay(bizContent, returnParams);
         } catch (Exception e) {
             logger.error("调用支付宝支付异常", e); // 打印具体异常
             throw TomatoException.payError();
@@ -67,7 +65,7 @@ public class OrderServiceImpl implements OrderService {
         result.put("orderId", orderId);
         result.put("totalAmount", order.getTotalAmount());
         result.put("paymentMethod", order.getPaymentMethod());
-        logger.info("pay method result:" + result.toString());
+        logger.info("pay method result:" + result);
         return result;
     }
 
