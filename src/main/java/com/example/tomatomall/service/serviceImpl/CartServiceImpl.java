@@ -5,10 +5,7 @@ import com.example.tomatomall.dto.CheckoutRequest;
 import com.example.tomatomall.enums.OrderStatusEnum;
 import com.example.tomatomall.exception.TomatoException;
 import com.example.tomatomall.po.*;
-import com.example.tomatomall.repository.CartRepository;
-import com.example.tomatomall.repository.OrderRepository;
-import com.example.tomatomall.repository.ProductRepository;
-import com.example.tomatomall.repository.StockpileRepository;
+import com.example.tomatomall.repository.*;
 import com.example.tomatomall.service.CartService;
 import com.example.tomatomall.util.SecurityUtil;
 import com.example.tomatomall.util.TokenUtil;
@@ -35,9 +32,6 @@ public class CartServiceImpl implements CartService {
     private static final Logger logger = LoggerFactory.getLogger(CartServiceImpl.class);
 
     @Autowired
-    private TokenUtil tokenUtil;
-
-    @Autowired
     private SecurityUtil securityUtil;
 
     @Autowired
@@ -51,6 +45,9 @@ public class CartServiceImpl implements CartService {
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository; ;
 
 
     @Override
@@ -90,7 +87,7 @@ public class CartServiceImpl implements CartService {
         return result;
     }
 
-    //删除购物车中的商品
+    // 删除购物车中的商品
     @Override
     public void deleteCartItem(Long cartItemId) {
         User user = securityUtil.getCurrentUser();
@@ -101,30 +98,35 @@ public class CartServiceImpl implements CartService {
     }
 
     //修改购物车中的商品数量
-        @Transactional
-        @Override
-        public void updateCartItemQuantity(Long cartItemId, Integer quantity) {
-            System.out.println(quantity);
-            User user = securityUtil.getCurrentUser();
-            Long userId = user.getId();
-            CartItem cartItem = cartRepository.findByUserIdAndCartItemId(userId, cartItemId)
-                    .orElseThrow(TomatoException::cartItemNotFound);
+    @Transactional
+    @Override
+    public void updateCartItemQuantity(Long cartItemId, Integer quantity) {
+        System.out.println(quantity);
+        User user = securityUtil.getCurrentUser();
+        Long userId = user.getId();
+        CartItem cartItem = cartRepository.findByUserIdAndCartItemId(userId, cartItemId)
+                .orElseThrow(TomatoException::cartItemNotFound);
 
-            if (quantity < 0) {
-                throw TomatoException.insufficientStock();
-            }
-            //检查库存是否足够
-            Stockpile stock = stockpileRepository.findById(cartItem.getProductId())
-                    .orElseThrow(() -> TomatoException.stockpileNotFound());
-            int stockAmount = stock.getAmount();
-            System.out.println("库存为：" + stockAmount + "，用户请求数量为：" + quantity);
-            if (stockAmount < quantity) {
-                System.out.println("库存不足，即将抛出异常");
-                throw TomatoException.insufficientStock();
-            }
-            cartItem.setQuantity(quantity);
-            cartRepository.save(cartItem);
+        if (quantity == 0) {
+            cartRepository.delete(cartItem);
+            return;
         }
+
+        if (quantity < 0) {
+            throw TomatoException.insufficientStock();
+        }
+        //检查库存是否足够
+        Stockpile stock = stockpileRepository.findById(cartItem.getProductId())
+                .orElseThrow(() -> TomatoException.stockpileNotFound());
+        int stockAmount = stock.getAmount();
+        logger.info("库存为：" + stockAmount + "，用户请求数量为：" + quantity);
+        if (stockAmount < quantity) {
+            logger.warn("库存不足，即将抛出异常");
+            throw TomatoException.insufficientStock();
+        }
+        cartItem.setQuantity(quantity);
+        cartRepository.save(cartItem);
+    }
 
     @Override
     public Map<String, Object> getAllCartItems() {
@@ -157,19 +159,30 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Order checkout(CheckoutRequest request) {
-
-        User user = securityUtil.getCurrentUser();
-        if (user == null) {
-            logger.error("当前会话中找不到用户，请确认是否登录且已写入 session");
-        } else {
-            logger.info("当前用户为：" + user.getUsername());
-        }
-//        logger.info("当前登录用户：", user.getUsername());
-        System.out.println(request);
+        logger.info("order request: " + request);
         if (request.getCartItemIds() == null || request.getCartItemIds().isEmpty()) {
             throw new IllegalArgumentException("cartItemIDs 不能为空");
         }
         List<CartItem> selectedItems = cartRepository.findAllById(request.getCartItemIds());
+
+        // 获取当前用户ID
+        Long userId = securityUtil.getCurrentUser().getId();
+        logger.info("current user: " + userId);
+
+
+//        // 查找是否存在相同用户和相同的cartItemIds的未支付的订单（即重复订单）
+//        List<Order> pendingOrders = orderRepository.findByUserIdAndStatus(userId, OrderStatusEnum.PENDING);
+//        for (Order pendingOrder : pendingOrders) {
+//            List<OrderItem> items = orderItemRepository.findByOrderId(pendingOrder.getOrderId());
+//            List<Long> existingCartItemsIds = items.stream().map(OrderItem::getCartItemId).sorted().collect(Collectors.toList());
+//            List<Long> currentCartItemsIds = selectedItems.stream().map(CartItem::getCartItemId).sorted().collect(Collectors.toList());
+//            if (existingCartItemsIds.equals(currentCartItemsIds)) {
+//                logger.info("Found existing pending order, reusing orderId:  " + pendingOrder.getOrderId());
+//                return pendingOrder;
+//            }
+//        }
+        //创建订单
+        Order order = new Order();
 
         // 检查库存是否足够
         for (CartItem cartItem : selectedItems) {
@@ -187,22 +200,7 @@ public class CartServiceImpl implements CartService {
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        //创建订单
-        Order order = new Order();
-
-        try {
-//            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//            if (authentication != null && authentication.isAuthenticated()) {
-//                System.out.println("Authenticated user: " + authentication.getName());
-//            } else {
-//                System.out.println("No authenticated user found.");
-//            }
-            Long userId = securityUtil.getCurrentUser().getId();
-            logger.info("userId:" + userId);
-            order.setUserId(userId);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to set user ID", e);
-        }
+        order.setUserId(userId);
         order.setTotalAmount(totalAmount);
         order.setPaymentMethod(request.getPaymentMethod());
         order.setStatus(OrderStatusEnum.PENDING);
@@ -210,6 +208,14 @@ public class CartServiceImpl implements CartService {
 
         //保存订单
         orderRepository.save(order);
+
+        // 保存订单id和cartItemId的映射关系
+        for (CartItem cartItem : selectedItems) {
+            OrderItem orderItem = new OrderItem();
+            orderItem.setCartItemId(cartItem.getCartItemId());
+            orderItem.setOrderId(order.getOrderId());
+            orderItemRepository.save(orderItem);
+        }
 
         //锁定库存
         for(CartItem cartItem : selectedItems){
@@ -221,6 +227,7 @@ public class CartServiceImpl implements CartService {
             stockpile.setFrozen(currentFrozen + cartItem.getQuantity());
             stockpileRepository.save(stockpile);
         }
+
         return order;
     }
 }

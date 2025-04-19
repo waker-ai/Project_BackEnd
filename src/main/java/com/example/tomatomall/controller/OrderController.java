@@ -52,6 +52,7 @@ public class OrderController {
 
     @PostMapping("/notify")
     public void notify( HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
+        logger.info("enter notify");
         // 1. 解析支付宝回调参数（通常是 application/x-www-form-urlencoded）
         Map<String, String> params = new HashMap<>();
         Map<String, String[]> Params = httpServletRequest.getParameterMap();
@@ -62,6 +63,7 @@ public class OrderController {
         }
 //        logger.info("支付宝回调参数：" + params);
         // 2. 验证支付宝签名（防止伪造请求）
+        logger.info("支付宝签名验证开始");
         boolean signVerified;
         try {
             signVerified = AlipaySignature.rsaCheckV1(
@@ -75,6 +77,7 @@ public class OrderController {
             httpServletResponse.getWriter().print("fail");
             return;
         }
+        logger.info("验证结果: " + signVerified);
 
         if (!signVerified) {
             logger.info("支付宝回调参数：" + params);
@@ -98,7 +101,8 @@ public class OrderController {
                 }
             }
             AliPayable service = orderService; //这里把service写死了,之后可以进行拓展
-            if (service != null) {
+            logger.info("orderService: " + orderService);
+            if (service != null) {logger.info("prepare to call payNotify");
                 if(service.payNotify(new_params))
                 {
                     httpServletResponse.getWriter().print("success");
@@ -126,34 +130,5 @@ public class OrderController {
             logger.error("重定向失败", e);
             e.printStackTrace();
         }
-        // visit url
-//        String filePath = "src/main/java/com/example/tomatomall/template/returnUrl.html";
-//        String html = "";
-//        url = "http://localhost:3000/#/cart";
-//        String filePath = url;
-//        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-//            StringBuilder fileContent = new StringBuilder();
-//            String line;
-//
-//            while ((line = reader.readLine()) != null) {
-//                fileContent.append(line).append("\n");
-//            }
-//
-//            html = fileContent.toString();
-//        } catch (IOException e) {
-//            logger.error("读取返回页面文件失败, 文件路径: {}", filePath, e);  // 记录详细错误
-//            e.printStackTrace();
-//        }
-//
-//        html = String.format(html, url);
-//        try {
-//            httpServletResponse.getWriter().write(html);// 直接将完整的表单html输出到页面
-//            httpServletResponse.getWriter().flush();
-//            httpServletResponse.getWriter().close();
-//        } catch (IOException e) {
-//            throw TomatoException.payError();
-//        }
     }
-
-
 }

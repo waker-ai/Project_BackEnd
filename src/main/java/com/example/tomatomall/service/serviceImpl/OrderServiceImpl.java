@@ -5,19 +5,30 @@ import com.example.tomatomall.config.AliPayConfig;
 import com.example.tomatomall.enums.OrderStatusEnum;
 import com.example.tomatomall.exception.TomatoException;
 import com.example.tomatomall.po.Order;
+import com.example.tomatomall.po.OrderItem;
+import com.example.tomatomall.po.Stockpile;
+import com.example.tomatomall.repository.CartRepository;
+import com.example.tomatomall.repository.OrderItemRepository;
 import com.example.tomatomall.repository.OrderRepository;
+import com.example.tomatomall.repository.StockpileRepository;
 import com.example.tomatomall.service.OrderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
+    private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
     @Autowired
     private OrderRepository orderRepository;
@@ -25,7 +36,14 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private AliPayConfig aliPayConfig;
 
-    private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
+    @Autowired
+    private CartRepository cartRepository;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private StockpileRepository stockpileRepository;
 
 
     @Override
@@ -51,32 +69,20 @@ public class OrderServiceImpl implements OrderService {
             throw TomatoException.payError();
         }
 
-//        httpServletResponse.setContentType("text/html;charset=UTF-8");
-//        try {
-//            httpServletResponse.getWriter().write(form);
-//            httpServletResponse.getWriter().flush();
-//            httpServletResponse.getWriter().close();
-//        } catch (IOException e) {
-//            throw TomatoException.payError();
-//        }
-
         Map<String, Object> result = new HashMap<>();
         result.put("paymentForm", form);
         result.put("orderId", orderId);
         result.put("totalAmount", order.getTotalAmount());
         result.put("paymentMethod", order.getPaymentMethod());
-        logger.info("pay method result:" + result);
+//        logger.info("pay method result:" + result);
         return result;
     }
 
     @Override
+    @Transactional
     public boolean payNotify(Map<String, String> params) {
         Long orderId = Long.valueOf(params.get("out_trade_no"));
-//        try {
-//            BigDecimal totalAmount = new BigDecimal(params.get("total_amount"));
-//        } catch (NumberFormatException e) {
-//            throw TomatoException.NumberFormatError();
-//        }
+//        logger.info("order" + orderId + " enter into payNotify");
         Order order = orderRepository.findByOrderId(orderId).orElse(null);
         if (order == null) {
             return false;
@@ -87,7 +93,34 @@ public class OrderServiceImpl implements OrderService {
             return false;
         }
         order.setStatus(OrderStatusEnum.SUCCESS);
+
+        // 释放冻结库存
+        List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
+        List<Long> cartItemIds = orderItems.stream()
+                .map(OrderItem::getCartItemId)
+                .collect(Collectors.toList());
+
+        for (Long cartItemId : cartItemIds) {
+            Long productId = cartRepository.findById(cartItemId).get().getProductId();
+            Integer quantity = cartRepository.findById(cartItemId).get().getQuantity();
+            Stockpile stockpile = stockpileRepository.findByProductId(productId).orElseThrow(TomatoException::productNotFound);
+            stockpile.setFrozen(stockpile.getFrozen() - quantity);
+            logger.info("释放冻结库存：" + quantity);
+            stockpileRepository.save(stockpile);
+        }
+
+//        logger.info("order" + orderId + " status changed to success");
+        // 删除购物车中相关商品
+        logger.info(cartItemIds.toString());
+        if(!cartItemIds.isEmpty()) {
+            cartRepository.deleteAllById(cartItemIds);
+        }
+
+        // 删除orderId和cartItemId的映射关系
+        orderItemRepository.deleteAllByOrderId(orderId);
+
         orderRepository.save(order);
+
         logger.info(String.format("Order %d payed", order.getOrderId()));
         return true;
     }

@@ -2,6 +2,7 @@ package com.example.tomatomall.service.serviceImpl;
 
 import com.example.tomatomall.po.Product;
 import com.example.tomatomall.po.Stockpile;
+import com.example.tomatomall.repository.CartRepository;
 import com.example.tomatomall.repository.SpecificationRepository;
 import com.example.tomatomall.po.Specification;
 import com.example.tomatomall.repository.ProductRepository;
@@ -29,6 +30,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private StockpileRepository stockpileRepository;
+    @Autowired
+    private CartRepository cartRepository;
 
     @Override
     public List<ProductVO> getAllProducts() {
@@ -157,6 +160,7 @@ public class ProductServiceImpl implements ProductService {
     public boolean deleteProduct(Long id) {
         Product product = productRepository.findById(id).orElse(null);
         if (product != null) {
+            cartRepository.deleteByProductId(id);
             productRepository.deleteById(id);
             return true;
         }

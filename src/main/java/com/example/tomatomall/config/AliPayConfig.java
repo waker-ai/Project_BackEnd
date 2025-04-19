@@ -57,41 +57,15 @@ public class AliPayConfig {
                 alipayPublicKey, signType);
         AlipayTradePagePayRequest request = new AlipayTradePagePayRequest();
 
-//        StringBuilder notifyUrlStringBuilder = new StringBuilder(notifyUrl + "?");
-//        for (String key : notifyParams.keySet()) {
-//            if (firstTime) {
-//                firstTime = false;
-//            } else {
-//                notifyUrlStringBuilder.append("&");
-//            }
-//            notifyUrlStringBuilder.append(key);
-//            notifyUrlStringBuilder.append("=");
-//            notifyUrlStringBuilder.append(notifyParams.get(key));
-//        }
-//        String gotNotifyUrl = notifyUrlStringBuilder.toString();
-//        System.out.println(gotNotifyUrl);
         request.setNotifyUrl(notifyUrl);
         logger.info("notifyUrl: " + notifyUrl);
 
-//        boolean firstTime = true;
-//        StringBuilder returnUrlStringBuilder = new StringBuilder(returnUrl + "?");
-//        for (String key : returnParams.keySet()) {
-//            if (firstTime) {
-//                firstTime = false;
-//            } else {
-//                returnUrlStringBuilder.append("&");
-//            }
-//            returnUrlStringBuilder.append(key);
-//            returnUrlStringBuilder.append("=");
-//            returnUrlStringBuilder.append(returnParams.get(key));
-//        }
-//        request.setReturnUrl(returnUrlStringBuilder.toString());
         request.setReturnUrl(returnUrl);
-        logger.info("returnUrl: " + returnUrl);
+//        logger.info("returnUrl: " + returnUrl);
         bizContent.put("product_code", "FAST_INSTANT_TRADE_PAY");
         request.setBizContent(bizContent.toString());
         String form;
-        logger.info("支付宝 bizContent: " + bizContent.toJSONString());
+//        logger.info("支付宝 bizContent: " + bizContent.toJSONString());
         try {
             form = alipayClient.pageExecute(request).getBody();
         } catch (Exception e) {
@@ -99,7 +73,7 @@ public class AliPayConfig {
             System.err.println("支付宝 pageExecute 失败，原因：" + e.getMessage());
             throw TomatoException.payError();
         }
-        System.out.println("支付宝返回的 form: " + form);
+//        System.out.println("支付宝返回的 form: " + form);
         return form;
     }
 }
