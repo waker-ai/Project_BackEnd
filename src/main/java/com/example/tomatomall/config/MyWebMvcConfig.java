@@ -32,6 +32,9 @@ public class MyWebMvcConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/api/orders/**")
                 .excludePathPatterns("/favicon.ico")
                 .excludePathPatterns("/error")
+                .excludePathPatterns("/api/advertisements/")
+                .excludePathPatterns("/api/advertisements")
+                .excludePathPatterns("/api/advertisements/**")
                 .order(1);
     }
 

@@ -37,7 +37,7 @@ public class AdvertisementServiceImpl implements AdvertisementService {
         Advertisement existing = advertisementRepository.findById(vo.getId())
                 .orElseThrow(() -> new RuntimeException("广告不存在"));
         BeanUtils.copyProperties(vo, existing, "id"); // 保持ID不变
-        existing.setImageUrl(vo.getImgUrl()); // imgUrl需要单独处理
+        existing.setImgUrl(vo.getImgUrl()); // imgUrl需要单独处理
         Advertisement updated = advertisementRepository.save(existing);
         return toVO(updated);
     }
@@ -53,14 +53,14 @@ public class AdvertisementServiceImpl implements AdvertisementService {
     private AdvertisementVO toVO(Advertisement ad) {
         AdvertisementVO vo = new AdvertisementVO();
         BeanUtils.copyProperties(ad, vo);
-        vo.setImgUrl(ad.getImageUrl());
+        vo.setImgUrl(ad.getImgUrl());
         return vo;
     }
 
     private Advertisement toEntity(AdvertisementVO vo) {
         Advertisement ad = new Advertisement();
         BeanUtils.copyProperties(vo, ad);
-        ad.setImageUrl(vo.getImgUrl());
+        ad.setImgUrl(vo.getImgUrl());
         return ad;
     }
 }
