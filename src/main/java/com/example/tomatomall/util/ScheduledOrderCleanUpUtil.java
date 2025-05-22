@@ -19,6 +19,7 @@ import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -31,10 +32,10 @@ public class ScheduledOrderCleanUpUtil {
     private final StockpileRepository stockpileRepository;
     private final CartRepository cartRepository;
 
-    @Scheduled(fixedRate = 5 * 60 * 1000) // 每5分钟执行一次
+    @Scheduled(fixedRate =  5 * 60 * 1000) // 每5分钟执行一次
     @Transactional
     public void releaseExiredOrders() {
-        Date deadline = new Date(System.currentTimeMillis() - 5 * 60 * 1000);
+        Date deadline = new Date(System.currentTimeMillis() - 5* 60 * 1000 );
         List<Order> expiredOrders = orderRepository.findByStatusAndCreateTimeBefore(OrderStatusEnum.PENDING, deadline);
 
         if (expiredOrders.isEmpty()) {
@@ -46,8 +47,14 @@ public class ScheduledOrderCleanUpUtil {
             List<OrderItem> orderItems = orderItemRepository.findByOrderId(order.getOrderId());
 
             for (OrderItem orderItem : orderItems) {
+                Long cartItemId = orderItem.getCartItemId();
+                Optional<CartItem> cartItemOpt = cartRepository.findById(cartItemId);
+                if (!cartItemOpt.isPresent()) {
+                    log.warn("CartItem not found for orderItem: {}, cartItemId: {}", orderItem.getId(), cartItemId);
+                    continue; // 跳过这个 cartItem，不影响其他处理
+                }
                 //得到的OrderItem中对应的cartItem
-                CartItem cartItem = cartRepository.findById(orderItem.getCartItemId()).orElseThrow(TomatoException::cartItemNotFound);
+                CartItem cartItem = cartItemOpt.get();
                 // 得到cartItem对应的stockpile
                 Stockpile stockpile = stockpileRepository.findByProductId(cartItem.getProductId()).orElseThrow(TomatoException::stockpileNotFound);
 

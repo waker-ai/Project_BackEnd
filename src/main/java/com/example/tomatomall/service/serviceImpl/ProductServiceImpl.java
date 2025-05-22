@@ -74,6 +74,7 @@ public class ProductServiceImpl implements ProductService {
         Product existproduct = productRepository.findById(productVO.getId()).orElse(null);
         if (existproduct != null) {
             // 更新产品信息
+            existproduct.setCategory(productVO.getCategory());
             existproduct.setTitle(productVO.getTitle());
             existproduct.setPrice(productVO.getPrice());
             existproduct.setRate(productVO.getRate());
@@ -111,6 +112,7 @@ public class ProductServiceImpl implements ProductService {
 
         // 处理可能为空的字段，避免 NullPointerException
         product.setTitle(Optional.ofNullable(productVO.getTitle()).orElse("默认标题"));
+        product.setCategory(Optional.ofNullable(productVO.getCategory()).orElse("默认分类"));
         product.setPrice(Optional.ofNullable(productVO.getPrice()).orElse(BigDecimal.ZERO));  // 默认价格为 0
         product.setRate(Optional.ofNullable(productVO.getRate()).orElse(0.0)); // 默认评分 0.0
         product.setDescription(Optional.ofNullable(productVO.getDescription()).orElse("暂无描述"));
@@ -127,7 +129,7 @@ public class ProductServiceImpl implements ProductService {
         stockpileRepository.save(stockpile);
 
 
-        // ✅ 第二步：保存规格 Specification
+
         if (productVO.getSpecifications() != null) {
             List<Specification> specifications = productVO.getSpecifications().stream()
                     .map(specVO -> {

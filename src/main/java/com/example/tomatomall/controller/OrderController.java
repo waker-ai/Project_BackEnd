@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import com.example.tomatomall.vo.OrderDetailVO;
+import com.example.tomatomall.vo.OrderVO;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -42,6 +45,18 @@ public class OrderController {
     @PostConstruct
     public void init() {
         notifyServiceList.put("orderService",  orderService);
+    }
+
+    @GetMapping("/{orderId}")
+    public Response<OrderDetailVO> get(@PathVariable(value = "orderId") Long orderId) {
+        OrderDetailVO orderDetail = orderService.getOrderDetail(orderId);
+        return Response.buildSuccess(orderDetail);
+    }
+
+    // 获取历史订单
+    @GetMapping("/history")
+    public Response<List<OrderVO>> getHistoryOrders() {
+        return Response.buildSuccess(orderService.getHistoryOrders());
     }
 
     @PostMapping("/{orderId}/pay")

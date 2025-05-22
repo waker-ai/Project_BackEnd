@@ -23,8 +23,7 @@ public class MyWebMvcConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(loginInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/api/accounts/")
-                .excludePathPatterns("/api/accounts/**")
+                .excludePathPatterns("/api/accounts")
                 .excludePathPatterns("/api/products/**")
                 .excludePathPatterns("/api/accounts/login")
                 .excludePathPatterns("/api/oss/signature")
@@ -35,6 +34,11 @@ public class MyWebMvcConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/api/advertisements/")
                 .excludePathPatterns("/api/advertisements")
                 .excludePathPatterns("/api/advertisements/**")
+                .excludePathPatterns("/api/members/notify")
+                .excludePathPatterns("/api/members/returnUrl")
+                .excludePathPatterns("/api/orders/*/pay")
+                .excludePathPatterns("/api/orders/notify")
+                .excludePathPatterns("/api/orders/returnUrl")
                 .order(1);
     }
 

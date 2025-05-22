@@ -13,7 +13,7 @@ public class GlobalExceptionHandler {
         logger.error(e.getMessage());
         //解开注释可以打印后面的堆栈跟踪信息
         e.printStackTrace();
-        return Response.buildFailure(e.getMessage(), "400");
+        return Response.buildFailure(e.getMessage(), "401");
     }
 }
 

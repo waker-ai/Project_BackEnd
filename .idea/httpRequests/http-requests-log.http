@@ -1,0 +1,212 @@
+POST http://localhost:8080/api/members/charge
+Content-Type: application/x-www-form-urlencoded
+token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxIiwiZXhwIjoxNzQ4NzY4NzQxfQ.s7RPX3r86b3JgSa210y5WCZkdkNfl8TX37TJTphcXt4
+Content-Length: 39
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+Cookie: JSESSIONID=76D7481AE090F4E1E82B28F2C914E0C4
+
+username=testuser&months=2&amount=20.00
+
+<> 2025-05-15T162555.200.json
+
+###
+
+POST http://localhost:8080/api/accounts/login
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 32
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+Cookie: JSESSIONID=76D7481AE090F4E1E82B28F2C914E0C4
+
+username=manager&password=123456
+
+<> 2025-05-15T162512.200.json
+
+###
+
+POST http://localhost:8080/api/members/charge
+Content-Type: application/x-www-form-urlencoded
+token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxIiwiZXhwIjoxNzQ4NzY4MjI5fQ.qIrxnvKOovghBAADZrub0Xk6_I4ew_f72o5hqY93JUc
+Content-Length: 39
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+Cookie: JSESSIONID=5F2DADE7B839DED642052A88CE5EE0C8
+
+username=testuser&months=2&amount=20.00
+
+<> 2025-05-15T161726.200.json
+
+###
+
+POST http://localhost:8080/api/accounts/login
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 32
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+Cookie: JSESSIONID=5F2DADE7B839DED642052A88CE5EE0C8
+
+username=manager&password=123456
+
+<> 2025-05-15T161640.200.json
+
+###
+
+POST http://localhost:8080/api/members/notify
+Content-Type: application/x-www-form-urlencoded
+token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxIiwiZXhwIjoxNzQ4NzY3Njk0fQ.vKQ95IkPMZ_u0mCnlvY9Os8cMnR8ct3dAGj_drAQewQ
+Content-Length: 63
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+Cookie: JSESSIONID=5F2DADE7B839DED642052A88CE5EE0C8
+
+trade_status=TRADE_SUCCESS&body=username%3Amanager%3Bmonths%3A1
+
+<> 2025-05-15T161254.200.txt
+
+###
+
+POST http://localhost:8080/api/members/charge
+Content-Type: application/x-www-form-urlencoded
+token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxIiwiZXhwIjoxNzQ4NzY0MjAxfQ.rxw9Dn_zaw6-7CHVdwonUSUindQPmZKihPs_Ell6f4g
+Content-Length: 39
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+Cookie: JSESSIONID=3A030B047225118FB5FC9A2389E21AEA
+
+username=testuser&months=2&amount=20.00
+
+<> 2025-05-15T160828.200.json
+
+###
+
+POST http://localhost:8080/api/accounts/login
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 32
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+Cookie: JSESSIONID=3A030B047225118FB5FC9A2389E21AEA
+
+username=manager&password=123456
+
+<> 2025-05-15T160746.200.json
+
+###
+
+POST http://localhost:8080/api/members/notify
+Content-Type: application/x-www-form-urlencoded
+token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxIiwiZXhwIjoxNzQ4NzY0MjAxfQ.rxw9Dn_zaw6-7CHVdwonUSUindQPmZKihPs_Ell6f4g
+Content-Length: 63
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+Cookie: JSESSIONID=3A030B047225118FB5FC9A2389E21AEA
+
+trade_status=TRADE_SUCCESS&body=username%3Amanager%3Bmonths%3A1
+
+<> 2025-05-15T154826.200.txt
+
+###
+
+POST http://localhost:8080/api/members/notify
+Content-Type: application/x-www-form-urlencoded
+token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxIiwiZXhwIjoxNzQ4NzY0MjAxfQ.rxw9Dn_zaw6-7CHVdwonUSUindQPmZKihPs_Ell6f4g
+Content-Length: 63
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+Cookie: JSESSIONID=3A030B047225118FB5FC9A2389E21AEA
+
+trade_status=TRADE_SUCCESS&body=username%3Amanager%3Bmonths%3A1
+
+<> 2025-05-15T152132.200.txt
+
+###
+
+POST http://localhost:8080/api/members/notify
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 63
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+Cookie: JSESSIONID=3A030B047225118FB5FC9A2389E21AEA
+
+trade_status=TRADE_SUCCESS&body=username%3Amanager%3Bmonths%3A1
+
+<> 2025-05-15T152028.200.json
+
+###
+
+GET http://localhost:8080/api/members/manager
+token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxIiwiZXhwIjoxNzQ4NzY0MjAxfQ.rxw9Dn_zaw6-7CHVdwonUSUindQPmZKihPs_Ell6f4g
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+Cookie: JSESSIONID=3A030B047225118FB5FC9A2389E21AEA
+
+<> 2025-05-15T151941.500.json
+
+###
+
+POST http://localhost:8080/api/members/charge
+Content-Type: application/x-www-form-urlencoded
+token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxIiwiZXhwIjoxNzQ4NzY0MjAxfQ.rxw9Dn_zaw6-7CHVdwonUSUindQPmZKihPs_Ell6f4g
+Content-Length: 39
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+Cookie: JSESSIONID=3A030B047225118FB5FC9A2389E21AEA
+
+username=testuser&months=2&amount=20.00
+
+<> 2025-05-15T151214.200.json
+
+###
+
+POST http://localhost:8080/api/members/charge
+Content-Type: application/x-www-form-urlencoded
+token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxIiwiZXhwIjoxNzQ4NzY0MjAxfQ.rxw9Dn_zaw6-7CHVdwonUSUindQPmZKihPs_Ell6f4g
+Content-Length: 39
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+username=testuser&months=2&amount=20.00
+
+<> 2025-05-15T151105.200.json
+
+###
+
+POST http://localhost:8080/api/accounts/login
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 32
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+username=manager&password=123456
+
+<> 2025-05-15T150932.200.json
+
+###
+
+POST http://localhost:8080/api/account/login
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 32
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.1.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+username=manager&password=123456
+
+<> 2025-05-15T150410.500.json
+
+###
+

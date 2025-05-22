@@ -2,6 +2,7 @@ package com.example.tomatomall.service.serviceImpl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.example.tomatomall.config.AliPayConfig;
+import com.example.tomatomall.config.AliPayOrder;
 import com.example.tomatomall.enums.OrderStatusEnum;
 import com.example.tomatomall.exception.TomatoException;
 import com.example.tomatomall.po.Order;
@@ -16,6 +17,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.example.tomatomall.vo.OrderDetailVO;
+import com.example.tomatomall.vo.OrderVO;
+import com.example.tomatomall.util.SecurityUtil;
+import com.example.tomatomall.po.*;
+import com.example.tomatomall.repository.*;
+import java.text.SimpleDateFormat;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
@@ -34,7 +42,7 @@ public class OrderServiceImpl implements OrderService {
     private OrderRepository orderRepository;
 
     @Autowired
-    private AliPayConfig aliPayConfig;
+    private AliPayOrder aliPayConfig;
 
     @Autowired
     private CartRepository cartRepository;
@@ -45,6 +53,63 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private StockpileRepository stockpileRepository;
 
+    @Autowired
+    private SecurityUtil securityUtil;
+
+    @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Override
+    public List<OrderVO> getHistoryOrders() {
+        User user = securityUtil.getCurrentUser();
+        if (user == null) {
+            logger.warn("当前未登录用户尝试获取历史订单");
+            return new ArrayList<>();
+        }
+        Long userId = user.getId();
+        List<Order> orders = orderRepository.findAllByUserId(userId);
+        if (orders == null) {
+            return new ArrayList<>();
+        }
+        return orders.stream()
+                .map(Order::toVO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public OrderDetailVO getOrderDetail(Long orderId) {
+        Order order = orderRepository.findByOrderId(orderId).orElseThrow(TomatoException::orderNotFound);
+        User user = accountRepository.findById(order.getUserId()).orElseThrow(TomatoException::userNotFount);
+
+        OrderDetailVO orderDetail = new OrderDetailVO();
+        orderDetail.setOrderId(orderId);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        orderDetail.setCreateTime(sdf.format(order.getCreateTime()));
+        orderDetail.setPaymentMethod(order.getPaymentMethod());
+        orderDetail.setStatus(order.getStatus().toString());
+        orderDetail.setReceiverName(user.getName());
+        orderDetail.setReceiverPhone(user.getTelephone());
+
+        List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
+        List<OrderDetailVO.OrderItemDetail> orderItemDetails = new ArrayList<>();
+
+        for (OrderItem orderItem : orderItems) {
+            Product product = productRepository.findById(orderItem.getProductId()).orElseThrow(TomatoException::productNotFound);
+
+            OrderDetailVO.OrderItemDetail itemDetail = new OrderDetailVO.OrderItemDetail();
+            itemDetail.setProductId(product.getId());
+            itemDetail.setProductName(product.getTitle());
+            itemDetail.setQuantity(orderItem.getQuantity());
+            itemDetail.setPrice(product.getPrice().doubleValue());
+            orderItemDetails.add(itemDetail);
+        }
+        orderDetail.setItems(orderItemDetails);
+        logger.info("getOrderDetail:" + orderDetail);
+        return orderDetail;
+    }
 
     @Override
     public Map<String, Object> pay(Long orderId, javax.servlet.http.HttpServletResponse httpServletResponse) {
@@ -117,7 +182,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // 删除orderId和cartItemId的映射关系
-        orderItemRepository.deleteAllByOrderId(orderId);
+//        orderItemRepository.deleteAllByOrderId(orderId);
 
         orderRepository.save(order);
 

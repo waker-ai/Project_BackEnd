@@ -13,5 +13,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findByUserIdAndStatus(Long userId, OrderStatusEnum status);
 
+    List<Order> findAllByUserId(Long userId);
+
     List<Order> findByStatusAndCreateTimeBefore(OrderStatusEnum orderStatusEnum, Date deadline);
 }

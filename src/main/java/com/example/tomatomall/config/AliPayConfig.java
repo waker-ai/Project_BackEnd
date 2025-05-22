@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 
-@ConfigurationProperties(prefix = "alipay")// 读取配置文件中的支付宝配置
+// 读取配置文件中的支付宝配置
 @Component
 @Getter
 @Setter
@@ -35,7 +35,7 @@ public class AliPayConfig {
     private String appPrivateKey;
     @Value("${alipay.alipay-public-key}")
     private String alipayPublicKey;
-    @Value("${alipay.notify-url}")
+    @Value("http://nde26b89.natappfree.cc/api/members/notify")
     private String notifyUrl;
 
     private static String format = "json";

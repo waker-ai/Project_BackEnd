@@ -24,4 +24,12 @@ public class OrderItem {
     @Basic
     @Column(name = "order_id")
     private Long orderId;
+
+    @Basic
+    @Column(name = "product_id")
+    private Long productId;
+
+    @Basic
+    @Column(name = "quantity")
+    private Integer quantity;
 }

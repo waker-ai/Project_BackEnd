@@ -1,0 +1,6 @@
+{
+  "timestamp": "2025-05-15T07:19:41.094+00:00",
+  "status": 500,
+  "error": "Internal Server Error",
+  "path": "/api/members/manager"
+}

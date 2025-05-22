@@ -42,7 +42,7 @@ public class LoginInterceptor implements HandlerInterceptor {
 
             if (user != null) {
                 request.getSession().setAttribute("currentUser", user);
-//                logger.info("用户信息存入session: " + user);
+
                 return true;
             } else {
                 logger.warn("用户信息为空");

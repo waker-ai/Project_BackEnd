@@ -41,17 +41,14 @@ public class AccountServiceImpl implements AccountService {
     public User createUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));//加密密码
         if (user.getAvatar() != null && !user.getAvatar().isEmpty()) {
-            try {
                 String avatarUrl = uploadAvatar(user.getAvatar());
                 user.setAvatar(avatarUrl);
-            } catch (IOException e) {
-                // 处理上传失败的情况，可以设置一个默认头像或者记录日志
-                user.setAvatar(null);
-            }
         }
         return accountRepository.save(user);//储存到数据库表中
     }
-    private String uploadAvatar(String base64Image) throws IOException {
+    // FILEPATH: E:/lab3后端/src/main/java/com/example/tomatomall/service/serviceImpl/AccountServiceImpl.java
+
+    private String uploadAvatar(String base64Image){
         // 解码Base64字符串
         byte[] imageBytes = Base64.getDecoder().decode(base64Image.split(",")[1]);
         // 使用OssService上传图片
@@ -65,12 +62,8 @@ public class AccountServiceImpl implements AccountService {
             // 更新用户信息，这个里面写了邮箱之类的更改，前端先确定能够实现用户和密码吧
             existingUser.setName(user.getName());
             if (user.getAvatar() != null && !user.getAvatar().isEmpty()) {
-                try {
-                    String avatarUrl = uploadAvatar(user.getAvatar());
+                    String avatarUrl =  uploadAvatar(user.getAvatar());
                     existingUser.setAvatar(avatarUrl);
-                } catch (IOException e) {
-                    // 处理上传失败的情况，可以保留原头像或者记录日志
-                }
             }
             existingUser.setTelephone(user.getTelephone());
             existingUser.setEmail(user.getEmail());

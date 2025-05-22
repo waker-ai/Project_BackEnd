@@ -23,6 +23,9 @@ public class Product {
     @Column(name = "id",nullable = false,updatable = false)
     private Long id;//id
 
+    @Column(name="category",length = 50)
+    private String category;
+
     @Column(name ="title",nullable = false,length = 50)
     private String title;//商品名
 
@@ -50,6 +53,7 @@ public class Product {
     public ProductVO toVO(){
         ProductVO productVO = new ProductVO();
         productVO.setId(this.id);
+        productVO.setCategory(this.category);
         productVO.setTitle(this.title);
         productVO.setPrice(this.price);
         productVO.setRate(this.rate);

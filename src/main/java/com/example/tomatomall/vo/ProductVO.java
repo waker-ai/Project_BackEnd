@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class ProductVO {
     private Long id; // 商品ID
+    private String category;
     private String title; // 商品名称
     private BigDecimal price; // 商品价格
     private Double rate; // 商品评分
@@ -31,6 +32,7 @@ public class ProductVO {
     public Product toPO() {
         Product product = new Product();
         product.setId(this.id);
+        product.setCategory(this.category);
         product.setTitle(this.title);
         product.setPrice(this.price);
         product.setRate(this.rate);

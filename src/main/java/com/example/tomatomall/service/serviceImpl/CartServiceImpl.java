@@ -116,7 +116,7 @@ public class CartServiceImpl implements CartService {
             throw TomatoException.insufficientStock();
         }
         //检查库存是否足够
-        Stockpile stock = stockpileRepository.findById(cartItem.getProductId())
+        Stockpile stock = stockpileRepository.findByProductId(cartItem.getProductId())
                 .orElseThrow(() -> TomatoException.stockpileNotFound());
         int stockAmount = stock.getAmount();
         logger.info("库存为：" + stockAmount + "，用户请求数量为：" + quantity);
@@ -214,6 +214,8 @@ public class CartServiceImpl implements CartService {
             OrderItem orderItem = new OrderItem();
             orderItem.setCartItemId(cartItem.getCartItemId());
             orderItem.setOrderId(order.getOrderId());
+            orderItem.setProductId(cartItem.getProductId());
+            orderItem.setQuantity(cartItem.getQuantity());
             orderItemRepository.save(orderItem);
         }
 
