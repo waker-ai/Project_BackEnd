@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 public class ProductVO {
     private Long id; // 商品ID
     private String category;
+    private Integer sales;
     private String title; // 商品名称
     private BigDecimal price; // 商品价格
     private Double rate; // 商品评分
@@ -33,6 +34,7 @@ public class ProductVO {
         Product product = new Product();
         product.setId(this.id);
         product.setCategory(this.category);
+        product.setSales(this.sales);
         product.setTitle(this.title);
         product.setPrice(this.price);
         product.setRate(this.rate);

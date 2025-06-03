@@ -32,10 +32,10 @@ public class ScheduledOrderCleanUpUtil {
     private final StockpileRepository stockpileRepository;
     private final CartRepository cartRepository;
 
-    @Scheduled(fixedRate =  5 * 60 * 1000) // 每5分钟执行一次
+    @Scheduled(fixedRate =  60 * 1000) // 每5分钟执行一次
     @Transactional
     public void releaseExiredOrders() {
-        Date deadline = new Date(System.currentTimeMillis() - 5* 60 * 1000 );
+        Date deadline = new Date(System.currentTimeMillis() - 60 * 1000 );
         List<Order> expiredOrders = orderRepository.findByStatusAndCreateTimeBefore(OrderStatusEnum.PENDING, deadline);
 
         if (expiredOrders.isEmpty()) {

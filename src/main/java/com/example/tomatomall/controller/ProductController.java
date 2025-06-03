@@ -7,6 +7,8 @@ import com.example.tomatomall.service.StockpileService;
 import com.example.tomatomall.vo.ProductVO;
 import com.example.tomatomall.vo.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -86,6 +88,22 @@ public class ProductController {
             return Response.buildSuccess(stockpile.get());
         }
         return Response.buildFailure("商品库存信息不存在", "404");
+    }
+
+    @GetMapping("/by-sales")
+    public Response<Page<ProductVO>> getProductBySales(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
+        Page<ProductVO> products = productService.getProductsBySales(PageRequest.of(page,size));
+        return Response.buildSuccess(products);
+    }
+
+    @GetMapping("/by-score")
+    public Response<Page<ProductVO>> getProductByScore(@RequestParam(defaultValue = "0") int page,
+                                                       @RequestParam(defaultValue = "10") int size){
+        Page<ProductVO> products = productService.getProductsByScore(PageRequest.of(page,size));
+        return Response.buildSuccess(products);
     }
 
 

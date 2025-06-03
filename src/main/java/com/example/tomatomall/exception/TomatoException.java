@@ -21,5 +21,5 @@ public class TomatoException extends RuntimeException{
 
     public static TomatoException stockpileNotFound() { return new TomatoException("为发现相关库存"); }
     public static TomatoException userNotFount() { return new TomatoException("未发现该用户"); }
-
+    public static TomatoException orderItemNotFound() { return new TomatoException("未发现该购物车商品");    }
 }

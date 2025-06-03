@@ -26,6 +26,8 @@ public class Product {
     @Column(name="category",length = 50)
     private String category;
 
+    @Column(name="sales",nullable = false)
+    private Integer sales=0;
     @Column(name ="title",nullable = false,length = 50)
     private String title;//商品名
 
@@ -54,6 +56,7 @@ public class Product {
         ProductVO productVO = new ProductVO();
         productVO.setId(this.id);
         productVO.setCategory(this.category);
+        productVO.setSales(this.sales);
         productVO.setTitle(this.title);
         productVO.setPrice(this.price);
         productVO.setRate(this.rate);

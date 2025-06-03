@@ -32,4 +32,9 @@ public class OrderItem {
     @Basic
     @Column(name = "quantity")
     private Integer quantity;
+
+    @Getter
+    @Basic
+    @Column(name = "reviewed")
+    private boolean reviewed = false; // 新增字段，用于标记是否已评价
 }

@@ -12,4 +12,5 @@ public interface OrderService extends AliPayable{
     List<OrderVO> getHistoryOrders();
 
     OrderDetailVO getOrderDetail(Long orderId);
+    void updateReviewStatus(Long orderId,  Long productId, boolean isReviewed);
 }

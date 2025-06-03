@@ -62,6 +62,17 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private ProductRepository productRepository;
 
+
+    @Override
+    @Transactional
+    public void updateReviewStatus(Long orderId, Long productId, boolean isReviewed) {
+        OrderItem orderItem = orderItemRepository.findByOrderIdAndProductId(orderId, productId)
+                .orElseThrow(TomatoException::orderItemNotFound);
+        orderItem.setReviewed(isReviewed);
+        logger.info("OrderId: {}, productId: {} is Reviewed", orderId, productId);
+        orderItemRepository.save(orderItem);
+    }
+
     @Override
     public List<OrderVO> getHistoryOrders() {
         User user = securityUtil.getCurrentUser();
@@ -104,6 +115,7 @@ public class OrderServiceImpl implements OrderService {
             itemDetail.setProductName(product.getTitle());
             itemDetail.setQuantity(orderItem.getQuantity());
             itemDetail.setPrice(product.getPrice().doubleValue());
+            itemDetail.setReviewed(orderItem.isReviewed());
             orderItemDetails.add(itemDetail);
         }
         orderDetail.setItems(orderItemDetails);
@@ -170,6 +182,9 @@ public class OrderServiceImpl implements OrderService {
             Integer quantity = cartRepository.findById(cartItemId).get().getQuantity();
             Stockpile stockpile = stockpileRepository.findByProductId(productId).orElseThrow(TomatoException::productNotFound);
             stockpile.setFrozen(stockpile.getFrozen() - quantity);
+            Product product = productRepository.findById(productId).get();
+            product.setSales(product.getSales() + quantity);
+            productRepository.save(product);
             logger.info("释放冻结库存：" + quantity);
             stockpileRepository.save(stockpile);
         }

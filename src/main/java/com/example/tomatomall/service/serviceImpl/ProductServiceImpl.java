@@ -10,6 +10,8 @@ import com.example.tomatomall.repository.StockpileRepository;
 import com.example.tomatomall.service.ProductService;
 import com.example.tomatomall.vo.ProductVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -69,42 +71,55 @@ public class ProductServiceImpl implements ProductService {
         return null;
     }
 
-    @Override
-    public ProductVO updateProduct(ProductVO productVO) {
-        Product existproduct = productRepository.findById(productVO.getId()).orElse(null);
-        if (existproduct != null) {
-            // 更新产品信息
-            existproduct.setCategory(productVO.getCategory());
-            existproduct.setTitle(productVO.getTitle());
-            existproduct.setPrice(productVO.getPrice());
-            existproduct.setRate(productVO.getRate());
-            existproduct.setDescription(productVO.getDescription());
-            existproduct.setCover(productVO.getCover());
-            existproduct.setDetail(productVO.getDetail());
-            if (productVO.getSpecifications() != null) {
-                // 先删除原有的规格，防止重复数据
-                specificationRepository.deleteByProductId(existproduct.getId());
+@Override
+@Transactional
+public ProductVO updateProduct(ProductVO productVO) {
+    Product existproduct = productRepository.findById(productVO.getId()).orElse(null);
+    if (existproduct != null) {
+        // 更新产品基本信息
+        existproduct.setCategory(productVO.getCategory());
+        existproduct.setTitle(productVO.getTitle());
+        existproduct.setPrice(productVO.getPrice());
+        existproduct.setRate(productVO.getRate());
+        existproduct.setDescription(productVO.getDescription());
+        existproduct.setCover(productVO.getCover());
+        existproduct.setDetail(productVO.getDetail());
 
-                // 转换 SpecificationVO 到 Specification，并设置关联关系
-                List<Specification> specifications = productVO.getSpecifications().stream()
-                        .map(specVO -> {
-                            Specification spec = new Specification();
-                            spec.setItem(specVO.getItem());
-                            spec.setValue(specVO.getValue());
-                            spec.setProduct(existproduct); // 设置关联关系
-                            return spec;
-                        })
-                        .collect(Collectors.toList());
+        if (productVO.getSpecifications() != null) {
+            // 删除原有规格
+            specificationRepository.deleteByProductId(existproduct.getId());
 
-                // 保存更新后的规格
-                specificationRepository.saveAll(specifications);
+            // 清空原有集合，防止残留已删除的 Specification
+            if (existproduct.getSpecifications() != null) {
+                existproduct.getSpecifications().clear();
+            } else {
+                existproduct.setSpecifications(new ArrayList<>());
             }
-            // 保存更新后的产品信息
-            Product updatedProduct = productRepository.save(existproduct);
-            return updatedProduct.toVO();
+
+            // 转换并创建新的 Specification 列表
+            List<Specification> specifications = productVO.getSpecifications().stream()
+                    .map(specVO -> {
+                        Specification spec = new Specification();
+                        spec.setItem(specVO.getItem());
+                        spec.setValue(specVO.getValue());
+                        spec.setProduct(existproduct); // 设置关联关系
+                        return spec;
+                    })
+                    .collect(Collectors.toList());
+
+            // 保存新的规格
+            specificationRepository.saveAll(specifications);
+
+            // 将新规格添加到 Product 的集合中
+            existproduct.getSpecifications().addAll(specifications);
         }
-        return null;
+
+        // 保存更新后的产品
+        Product updatedProduct = productRepository.save(existproduct);
+        return updatedProduct.toVO();
     }
+    return null;
+}
 
     @Override
     public ProductVO createProduct(ProductVO productVO) {
@@ -170,4 +185,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
 
+    @Override
+    public Page<ProductVO> getProductsBySales(Pageable pageable) {
+        Page<Product> productPage = productRepository.findAllByOrderBySalesDesc(pageable);
+        return productPage.map(Product::toVO);
+    }
+    public Page<ProductVO> getProductsByScore(Pageable pageable) {
+        Page<Product> productPage = productRepository.findAllByOrderByRateDesc(pageable);
+        return productPage.map(Product::toVO);
+    }
 }

@@ -66,7 +66,7 @@ public class CartServiceImpl implements CartService {
         //更新购物车中的商品数量
         int newQuantity = quantity + cartItem.getQuantity();
         // 检查库存是否足够
-        if (stockpileRepository.findById(productId).get().getAmount() < newQuantity) {
+        if (stockpileRepository.findByProductId(productId).get().getAmount() < newQuantity) {
             throw TomatoException.insufficientStock();
         }
         cartItem.setQuantity(newQuantity);

@@ -35,7 +35,7 @@ public class AliPayConfig {
     private String appPrivateKey;
     @Value("${alipay.alipay-public-key}")
     private String alipayPublicKey;
-    @Value("http://nde26b89.natappfree.cc/api/members/notify")
+    @Value("${alipay.member-notify-url}")
     private String notifyUrl;
 
     private static String format = "json";
