@@ -17,14 +17,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import javax.net.ssl.HandshakeCompletedEvent;
-import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.hibernate.internal.CoreLogging.logger;
 
 @Service
 public class CartServiceImpl implements CartService {
@@ -205,6 +200,7 @@ public class CartServiceImpl implements CartService {
         order.setPaymentMethod(request.getPaymentMethod());
         order.setStatus(OrderStatusEnum.PENDING);
         order.setCreateTime(new Date());
+        order.setShippingAddressId(request.getShippingAddressId());
 
         //保存订单
         orderRepository.save(order);

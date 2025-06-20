@@ -46,6 +46,11 @@ public class Order {
     @Column(name = "create_time")
     private Date createTime;
 
+    //收货地址Id
+    @Basic
+    @Column(name = "shipping_address_id")
+    private Long shippingAddressId;
+
     public OrderVO toVO() {
         OrderVO order = new OrderVO();
         order.setOrderId(orderId);
@@ -54,6 +59,7 @@ public class Order {
         order.setPaymentMethod(paymentMethod);
         order.setStatus(status);
         order.setCreateTime(createTime);
+        order.setShippingAddressId(shippingAddressId);
         return order;
     }
 

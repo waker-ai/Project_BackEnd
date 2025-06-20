@@ -23,6 +23,7 @@ public class OrderVO {
     private String paymentMethod;
     private OrderStatusEnum status;
     private Date createTime;
+    private Long shippingAddressId;
 
     public Order toPO() {
         Order order = new Order();
@@ -32,6 +33,7 @@ public class OrderVO {
         order.setPaymentMethod(paymentMethod);
         order.setStatus(status);
         order.setCreateTime(createTime);
+        order.setShippingAddressId(shippingAddressId);
         return order;
     }
 

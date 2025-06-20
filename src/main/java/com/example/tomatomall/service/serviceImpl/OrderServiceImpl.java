@@ -1,7 +1,6 @@
 package com.example.tomatomall.service.serviceImpl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.example.tomatomall.config.AliPayConfig;
 import com.example.tomatomall.config.AliPayOrder;
 import com.example.tomatomall.enums.OrderStatusEnum;
 import com.example.tomatomall.exception.TomatoException;
@@ -26,7 +25,6 @@ import com.example.tomatomall.repository.*;
 import java.text.SimpleDateFormat;
 
 import javax.transaction.Transactional;
-import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,10 +55,10 @@ public class OrderServiceImpl implements OrderService {
     private SecurityUtil securityUtil;
 
     @Autowired
-    private AccountRepository accountRepository;
+    private ProductRepository productRepository;
 
     @Autowired
-    private ProductRepository productRepository;
+    private AddressRepository addressRepository;
 
 
     @Override
@@ -93,16 +91,15 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDetailVO getOrderDetail(Long orderId) {
         Order order = orderRepository.findByOrderId(orderId).orElseThrow(TomatoException::orderNotFound);
-        User user = accountRepository.findById(order.getUserId()).orElseThrow(TomatoException::userNotFount);
-
         OrderDetailVO orderDetail = new OrderDetailVO();
         orderDetail.setOrderId(orderId);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         orderDetail.setCreateTime(sdf.format(order.getCreateTime()));
         orderDetail.setPaymentMethod(order.getPaymentMethod());
         orderDetail.setStatus(order.getStatus().toString());
-        orderDetail.setReceiverName(user.getName());
-        orderDetail.setReceiverPhone(user.getTelephone());
+        Address address = addressRepository.findById(order.getShippingAddressId()).orElseThrow(TomatoException::addressNotFound);
+        orderDetail.setReceiverName(address.getAddresseeName());
+        orderDetail.setReceiverPhone(address.getPhone());
 
         List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
         List<OrderDetailVO.OrderItemDetail> orderItemDetails = new ArrayList<>();
