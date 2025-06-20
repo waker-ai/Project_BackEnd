@@ -12,6 +12,7 @@ import java.util.List;
 public class CheckoutRequest {
     private List<Long> cartItemIds;
     private Long shippingAddressId;
+    private Long selectedCouponId;
     private String paymentMethod;
 }
 

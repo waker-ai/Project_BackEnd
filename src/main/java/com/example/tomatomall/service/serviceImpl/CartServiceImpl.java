@@ -1,6 +1,5 @@
 package com.example.tomatomall.service.serviceImpl;
 
-import com.example.tomatomall.config.LoginInterceptor;
 import com.example.tomatomall.dto.CheckoutRequest;
 import com.example.tomatomall.enums.OrderStatusEnum;
 import com.example.tomatomall.exception.TomatoException;
@@ -8,13 +7,10 @@ import com.example.tomatomall.po.*;
 import com.example.tomatomall.repository.*;
 import com.example.tomatomall.service.CartService;
 import com.example.tomatomall.util.SecurityUtil;
-import com.example.tomatomall.util.TokenUtil;
-import com.example.tomatomall.vo.CartItemVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -42,7 +38,10 @@ public class CartServiceImpl implements CartService {
     private OrderRepository orderRepository;
 
     @Autowired
-    private OrderItemRepository orderItemRepository; ;
+    private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private CouponRepository couponRepository;
 
 
     @Override
@@ -164,18 +163,6 @@ public class CartServiceImpl implements CartService {
         Long userId = securityUtil.getCurrentUser().getId();
         logger.info("current user: " + userId);
 
-
-//        // 查找是否存在相同用户和相同的cartItemIds的未支付的订单（即重复订单）
-//        List<Order> pendingOrders = orderRepository.findByUserIdAndStatus(userId, OrderStatusEnum.PENDING);
-//        for (Order pendingOrder : pendingOrders) {
-//            List<OrderItem> items = orderItemRepository.findByOrderId(pendingOrder.getOrderId());
-//            List<Long> existingCartItemsIds = items.stream().map(OrderItem::getCartItemId).sorted().collect(Collectors.toList());
-//            List<Long> currentCartItemsIds = selectedItems.stream().map(CartItem::getCartItemId).sorted().collect(Collectors.toList());
-//            if (existingCartItemsIds.equals(currentCartItemsIds)) {
-//                logger.info("Found existing pending order, reusing orderId:  " + pendingOrder.getOrderId());
-//                return pendingOrder;
-//            }
-//        }
         //创建订单
         Order order = new Order();
 
@@ -194,6 +181,15 @@ public class CartServiceImpl implements CartService {
                     return product.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+        Long couponId = request.getSelectedCouponId();
+        if(couponId != null) {
+            Coupon coupon = couponRepository.findById(request.getSelectedCouponId())
+                    .orElseThrow(TomatoException::couponNotFound); // 检查优惠券是否存在
+            totalAmount = totalAmount.subtract(coupon.getDiscountAmount());
+            // 防止金额为负数
+            totalAmount = totalAmount.max(BigDecimal.ZERO);
+        }
+
 
         order.setUserId(userId);
         order.setTotalAmount(totalAmount);

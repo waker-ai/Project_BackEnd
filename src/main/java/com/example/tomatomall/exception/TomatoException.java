@@ -25,4 +25,6 @@ public class TomatoException extends RuntimeException{
 
     public static TomatoException addressNotFound() { return new TomatoException("未发现该地址"); }
 
+    public static TomatoException couponNotFound() { return new TomatoException("未发现该优惠券"); }
+
 }

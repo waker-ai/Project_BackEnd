@@ -22,6 +22,5 @@ public class Advertisement {
     @Column(name = "img_url", nullable = false, length = 500)
     private String imgUrl;
 
-    @Column(name = "product_id", nullable = false)
-    private Integer productId;
+
 }
