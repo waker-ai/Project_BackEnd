@@ -1,6 +1,5 @@
 package com.example.tomatomall.controller;
 
-import com.example.tomatomall.po.LoginRequest;
 import com.example.tomatomall.po.User;
 import com.example.tomatomall.service.AccountService;
 import com.example.tomatomall.util.TokenUtil;

@@ -1,5 +1,3 @@
-// FILEPATH: E:/lab3后端/src/main/java/com/example/tomatomall/service/impl/MemberServiceImpl.java
-
 package com.example.tomatomall.service.serviceImpl;
 
 import com.alibaba.fastjson.JSONObject;
@@ -18,6 +16,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 会员服务实现类，负责会员相关的业务逻辑处理
+ */
 @Service
 public class MemberServiceImpl implements MemberService {
 
@@ -27,6 +28,14 @@ public class MemberServiceImpl implements MemberService {
     @Autowired
     private AliPayConfig aliPayConfig;
 
+    /**
+     * 生成会员充值支付表单
+     * @param username 用户名
+     * @param months 充值的会员时长（月）
+     * @param amount 支付金额
+     * @param level 会员等级
+     * @return 支付表单HTML字符串（由支付宝SDK生成）
+     */
     @Override
     public String createMembershipPayment(String username, int months, BigDecimal amount,String level) {
         // 生成订单号，这里简单使用时间戳加用户名
@@ -52,6 +61,13 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
+    /**
+     * 创建或更新会员信息
+     * @param username 用户名
+     * @param months 会员有效期（月）
+     * @param level 会员等级
+     * @return 更新后的会员实体
+     */
     @Override
     public Member createOrUpdateMembership(String username, int months,String level) {
         Member member = memberRepository.findByUsername(username)
@@ -77,6 +93,10 @@ public class MemberServiceImpl implements MemberService {
                 .orElse(null); // 返回null而不是抛出异常
     }
 
+    /**
+     * 定时任务：每天凌晨检查并更新会员状态
+     * 如果会员过期，将其状态设置为非激活
+     */
     @Override
     @Scheduled(cron = "0 0 0 * * ?") // 每天凌晨执行
     public void checkAndUpdateMembershipStatus() {
@@ -91,6 +111,11 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
+    /**
+     * 升级会员等级的逻辑
+     * @param currentLevel 当前会员等级
+     * @return 升级后的会员等级
+     */
     private Member.MembershipLevel upgradeMembershipLevel(Member.MembershipLevel currentLevel) {
         switch (currentLevel) {
             case BRONZE:
@@ -104,6 +129,13 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
+    /**
+     * 处理支付成功后的业务逻辑
+     * @param username 用户名
+     * @param months 充值月份数
+     * @param level 会员等级
+     * @return 处理是否成功
+     */
     @Override
     @Transactional
     public boolean handleSuccessfulPayment(String username, int months,String level) {
@@ -115,12 +147,22 @@ public class MemberServiceImpl implements MemberService {
             return false;
         }
     }
+
+    /**
+     * 判断某用户是否为活跃会员
+     * @param username 用户名
+     * @return 是否为活跃会员
+     */
     @Override
     public boolean isMember(String username) {
         Member member = getMemberByUsername(username);
         return member != null&&member.isActive();
     }
 
+    /**
+     * 获取所有会员列表
+     * @return 会员列表
+     */
     @Override
     public List<Member> getAllMembers() {
         return memberRepository.findAll();

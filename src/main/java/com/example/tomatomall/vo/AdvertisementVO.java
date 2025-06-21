@@ -8,5 +8,5 @@ public class AdvertisementVO {
     private String title;
     private String content;
     private String imgUrl;
-//    private Integer productId;
+
 }

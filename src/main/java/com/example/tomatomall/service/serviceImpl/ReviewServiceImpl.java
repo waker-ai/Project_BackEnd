@@ -2,7 +2,6 @@ package com.example.tomatomall.service.serviceImpl;
 
 import com.example.tomatomall.exception.TomatoException;
 import com.example.tomatomall.po.*;
-import com.example.tomatomall.repository.OrderItemRepository;
 import com.example.tomatomall.repository.ProductRepository;
 import com.example.tomatomall.repository.ReviewRepository;
 import com.example.tomatomall.service.OrderService;
@@ -18,6 +17,9 @@ import com.example.tomatomall.util.SecurityUtil;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * ReviewService 的实现类，负责商品评价的创建、查询及更新商品平均评分
+ */
 @Service
 public class ReviewServiceImpl implements ReviewService {
     private static final Logger logger = LoggerFactory.getLogger(ReviewServiceImpl.class);
@@ -34,6 +36,12 @@ public class ReviewServiceImpl implements ReviewService {
     @Autowired
     private ReviewRepository reviewRepository;
 
+
+    /**
+     * 创建商品评价
+     * @param reviewVO 评价视图对象，包含评价内容、评分、订单及商品信息
+     * @return 创建成功的评价视图对象
+     */
     @Override
     public ReviewVO createReview(ReviewVO reviewVO) {
         Review review = new Review();
@@ -59,6 +67,11 @@ public class ReviewServiceImpl implements ReviewService {
         return reviewVO;
     }
 
+    /**
+     * 根据商品ID查询该商品的所有评价
+     * @param productId 商品ID
+     * @return 评价视图对象列表
+     */
     @Override
     public List<ReviewVO> getReviewsByProductId(Long productId) {
         List<Review> reviews = reviewRepository.findByProductId(productId);
@@ -68,6 +81,10 @@ public class ReviewServiceImpl implements ReviewService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 计算并更新指定商品的平均评分
+     * @param productId 商品ID
+     */
     @Override
     public void updateProductAverageRating(Long productId) {
         List<Review> reviews = reviewRepository.findByProductId(productId);

@@ -5,17 +5,13 @@ import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.request.AlipayTradePagePayRequest;
 import com.example.tomatomall.exception.TomatoException;
-import com.example.tomatomall.service.serviceImpl.CartServiceImpl;
 import lombok.Getter;
 import lombok.Setter;
 
-import org.apache.logging.log4j.util.StringBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
-import java.util.List;
 import java.util.Map;
 
 // 读取配置文件中的支付宝配置

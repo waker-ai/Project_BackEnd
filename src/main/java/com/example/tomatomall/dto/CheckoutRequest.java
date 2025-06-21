@@ -16,12 +16,3 @@ public class CheckoutRequest {
     private String paymentMethod;
 }
 
-//@Data
-//@Getter
-//@Setter
-//class ShippingAddress {
-//    private String name; //姓名
-//    private String phone; //手机号
-//    private String postalCode; //邮编
-//    private String address; //地址
-//}
