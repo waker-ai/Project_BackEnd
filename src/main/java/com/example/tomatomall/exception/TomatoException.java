@@ -11,8 +11,6 @@ public class TomatoException extends RuntimeException{
 
     public static TomatoException orderNotFound() { return new TomatoException("未发现该订单"); }
 
-    public static TomatoException NumberFormatError() { return new TomatoException("数字类型转化错误"); }
-
     public static TomatoException illegalOrderState() { return new TomatoException("订单状态错误"); }
 
     public static TomatoException productNotFound() { return new TomatoException("未发现该商品"); }

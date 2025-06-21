@@ -32,6 +32,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * OrderServiceImpl 实现类
+ * 负责订单相关业务逻辑的实现，如订单支付、查询、详情获取、评论状态更新等。
+ *
+ * 支持功能包括：
+ * - 提交支付请求并调用支付宝支付
+ * - 处理支付成功回调并释放冻结库存
+ * - 获取用户历史订单
+ * - 获取订单详情
+ * - 更新订单项的评论状态
+ */
 @Service
 public class OrderServiceImpl implements OrderService {
     private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
@@ -61,6 +72,13 @@ public class OrderServiceImpl implements OrderService {
     private AddressRepository addressRepository;
 
 
+    /**
+     * 更新订单项中某个商品的评论状态。
+     *
+     * @param orderId    订单ID
+     * @param productId  商品ID
+     * @param isReviewed 是否已评论
+     */
     @Override
     @Transactional
     public void updateReviewStatus(Long orderId, Long productId, boolean isReviewed) {
@@ -71,6 +89,11 @@ public class OrderServiceImpl implements OrderService {
         orderItemRepository.save(orderItem);
     }
 
+    /**
+     * 获取当前登录用户的所有历史订单（不包含订单项详情）。
+     *
+     * @return 当前用户的订单列表（简要信息）
+     */
     @Override
     public List<OrderVO> getHistoryOrders() {
         User user = securityUtil.getCurrentUser();
@@ -88,6 +111,12 @@ public class OrderServiceImpl implements OrderService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 获取指定订单的详细信息，包括收货人、订单状态、商品列表等。
+     *
+     * @param orderId 订单ID
+     * @return 订单详情视图对象
+     */
     @Override
     public OrderDetailVO getOrderDetail(Long orderId) {
         Order order = orderRepository.findByOrderId(orderId).orElseThrow(TomatoException::orderNotFound);
@@ -120,6 +149,13 @@ public class OrderServiceImpl implements OrderService {
         return orderDetail;
     }
 
+    /**
+     * 发起支付宝支付请求。
+     *
+     * @param orderId            订单ID
+     * @param httpServletResponse 用于传输支付跳转（未使用）
+     * @return 返回包含支付表单HTML、订单信息等
+     */
     @Override
     public Map<String, Object> pay(Long orderId, javax.servlet.http.HttpServletResponse httpServletResponse) {
         Order order = orderRepository.findByOrderId(orderId).orElse(null);
@@ -152,6 +188,16 @@ public class OrderServiceImpl implements OrderService {
         return result;
     }
 
+
+    /**
+     * 支付成功回调处理。
+     * 1. 更新订单状态为成功；
+     * 2. 释放冻结库存；
+     * 3. 删除购物车中已支付商品；
+     *
+     * @param params 回调参数，需包含 out_trade_no（订单号）
+     * @return 是否处理成功
+     */
     @Override
     @Transactional
     public boolean payNotify(Map<String, String> params) {
@@ -203,6 +249,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
 
+    /**
+     * 校验订单当前状态是否符合预期状态。
+     *
+     * @param order       订单对象
+     * @param orderStatus 预期状态
+     */
     private void assertOrderStatus(Order order, OrderStatusEnum orderStatus) {
         if (order.getStatus() != orderStatus)
             throw TomatoException.illegalOrderState();

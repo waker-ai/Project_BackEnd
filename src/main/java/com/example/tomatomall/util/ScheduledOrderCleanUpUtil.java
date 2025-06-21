@@ -18,10 +18,18 @@ import org.springframework.stereotype.Component;
 import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+/**
+ * 定时任务工具类：用于定期检查并处理超时未支付的订单。
+ *
+ * 功能包括：
+ * - 找出已创建但超过 5 分钟未支付的订单（PENDING 状态）
+ * - 将其状态改为 TIMEOUT
+ * - 同时释放已锁定的库存（减少 frozen，增加 amount）
+ *
+ * 本类由 Spring 管理，使用 @Scheduled 注解实现定时任务。
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -32,10 +40,11 @@ public class ScheduledOrderCleanUpUtil {
     private final StockpileRepository stockpileRepository;
     private final CartRepository cartRepository;
 
-    @Scheduled(fixedRate =  60 * 1000) // 每5分钟执行一次
+    // 定时任务释放库存
+    @Scheduled(fixedRate =  5 * 60 * 1000) // 每5分钟执行一次
     @Transactional
-    public void releaseExiredOrders() {
-        Date deadline = new Date(System.currentTimeMillis() - 60 * 1000 );
+    public void releaseExpiredOrders() {
+        Date deadline = new Date(System.currentTimeMillis() - 5 * 60 * 1000);
         List<Order> expiredOrders = orderRepository.findByStatusAndCreateTimeBefore(OrderStatusEnum.PENDING, deadline);
 
         if (expiredOrders.isEmpty()) {
