@@ -22,6 +22,8 @@ public interface MemberService {
      */
     Member createOrUpdateMembership(String username, int months,String level);
 
+    public void checkAndUpdateMembershipStatus();
+
     /**
      * 根据用户名查询会员信息。
      *

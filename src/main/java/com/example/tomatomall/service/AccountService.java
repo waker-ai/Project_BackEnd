@@ -12,6 +12,8 @@ public interface AccountService {
      */
     User findByUsername(String username);
 
+    User getInformation();
+
     /**
      * 创建新用户
      * @param user 用户实体，包含用户信息
